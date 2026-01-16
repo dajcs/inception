@@ -1,33 +1,20 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    50-server.cnf                                      :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/01/16 14:45:17 by anemet            #+#    #+#              #
-#    Updated: 2026/01/16 14:49:56 by anemet           ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 [server]
 
 [mysqld]
 # Basic settings
-user            = mysql
-pid-file        = /run/mysqld/mysqld.pid
-socket          = /run/mysqld/mysqld.sock
-port            = 3306
-basedir         = /usr
-datadir        = /var/lib/mysql
-tmpdir         = /tmp
-lc-messages-dir = /usr/share/mysql
+user                    = mysql
+pid-file                = /run/mysqld/mysqld.pid
+socket                  = /run/mysqld/mysqld.sock
+port                    = 3306
+basedir                 = /usr
+datadir                 = /var/lib/mysql
+tmpdir                  = /tmp
+lc-messages-dir         = /usr/share/mysql
 
 # Networking
-# This is the CRITICAL part
-# 0.0.0.0 allows connections from any IP address
-bind-address    = 0.0.0.0
+# This is the CRITICAL part. 0.0.0.0 allows connections from any IP.
+bind-address            = 0.0.0.0
 
 # Character sets
-character-set-server = utf8mb4
-collation-server     = utf8mb4_general_ci
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci

@@ -1,0 +1,70 @@
+# version: '3'
+
+services:
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    image: mariadb
+    # Load variables from .env file
+    env_file:
+      - .env
+    networks:
+      - inception
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    restart: always
+
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    image: wordpress
+    env_file:
+      - .env
+    networks:
+      - inception
+    volumes:
+      - wordpress_data:/var/www/html
+    # Wait for mariadb to be ready
+    depends_on:
+      - mariadb
+    restart: always
+
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    image: nginx
+    env_file:
+      - .env
+    ports:
+      - "8443:443"
+    networks:
+      - inception
+    volumes:
+      # Nginx needs access to WP files to serve static assets (images, css)
+      - wordpress_data:/var/www/html
+    depends_on:
+      - wordpress
+    restart: always
+
+# Define the network
+networks:
+  inception:
+    driver: bridge
+
+# Define the volumes
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # ABSOLUTE PATH TO YOUR HOST MACHINE FOLDER
+      device: /home/anemet/data/mariadb
+
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # ABSOLUTE PATH TO YOUR HOST MACHINE FOLDER
+      device: /home/anemet/data/wordpress

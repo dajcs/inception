@@ -22,7 +22,7 @@ The whole project has to be done using Docker and Docker-Compose.
 - It is forbidden to pull ready made Docker images from DockerHub (Debian being
   excluded from this rule)
 - We have to set up:
-  - A Docker container that contains NGINX with TLSv1.3 only
+  - A Docker container that contains NGINX with TLSv1.2 or TLSv1.3 only
   - A Docker container that contains WordPress + php-fpm (it must be installed
     and configure) only, without nginx
   - A Docker container that contains MariaDB only, without nginx
@@ -59,20 +59,20 @@ The whole project has to be done using Docker and Docker-Compose.
 Example diagram of the final architecture:
 
 ```
-                                                   www
+                                                 { www }
                                                     ^
                                                     | (443)
                                                     |
-+----------------[ Computer HOST ]------------------|---------+
++----------------{ Computer HOST }------------------|---------+
 |                                                   |         |
-|  +-------------[ Docker network ]-----------------|------+  |
+|  +-------------{ Docker network }-----------------|------+  |
 |  |                                                V      |  |
-|  |  [DB] <---3306---> [WordPress] <---9000---> [NGINX]   |  | 
-|  |   ^                    ^            ^                 |  |
-|  +---|--------------------|------------|-----------------+  |
-|      |                    |            |                    |
-|      V                    V            V                    |
-|  (DB Volume)            (WordPress Volume)                  |
+|  |  [DB] <--(3306)--> [WordPress] <--(9000)--> [NGINX]   |  |
+|  |   ^                        ^                   ^      |  |
+|  +---|------------------------|-------------------|------+  |
+|      |                        |                   |         |
+|      V                        V                   V         |
+|  (DB Volume)                 ( WordPress   Volume  )        |
 |                                                             |
 +-------------------------------------------------------------+
 
@@ -82,7 +82,7 @@ Legend:
 - [NGINX]: NGINX container
 - (DB Volume): Named volume for MariaDB database
 - (WordPress Volume): Named volume for WordPress website files
-- www: external users accessing the services via HTTPS
+- { www }: external users accessing the services via HTTPS
 - Ports: 443 for HTTPS, 3306 for MariaDB, 9000 for php-fpm
 ```
 

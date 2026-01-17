@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/16 14:39:20 by anemet            #+#    #+#              #
-#    Updated: 2026/01/16 14:43:33 by anemet           ###   ########.fr        #
+#    Updated: 2026/01/16 21:59:08 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y mariadb-server
 
 # Copy the configuration file to the correct location in the container
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+
+# Set .cnf file permissions (necessary for WSL2 perm 777 -> 644)
+RUN chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
 
 # Copy the startup script
 COPY tools/mariadb.sh /mariadb.sh

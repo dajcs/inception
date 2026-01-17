@@ -4,7 +4,7 @@
 #########################
 
 # Open `/etc/hosts` on your machine.
-# Add the line: `127.0.0.1 login.42.fr` 
+# Add the line: `127.0.0.1 login.42.fr`
 # (replace `login` with your 42 username)
 
 # create the persistent storage folders on host
@@ -19,6 +19,7 @@ touch Makefile
 touch README.md
 touch USER_DOC.md
 touch DEV_DOC.md
+echo ".env" >> .gitignore
 
 mkdir secrets/
 touch secrets/db_password.txt

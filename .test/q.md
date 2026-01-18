@@ -4,8 +4,8 @@
 
 - All the files required for the configuration must be placed in a `srcs` folder
 - A Makefile is also required and must be located at the root of the directory.
-  It must set up the entire application (i.e., it has to build the Docker images 
-  using `docker-compose` and start the containers).
+  It must set up the entire application (i.e., it has to build the Docker images
+  using `docker compose` and start the containers).
 
 
 ## Mandatory Part

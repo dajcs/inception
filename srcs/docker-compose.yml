@@ -4,7 +4,8 @@ services:
   mariadb:
     container_name: mariadb
     build: ./requirements/mariadb
-    image: mariadb
+    # image mariadb_42: the _42 suffix is to avoid name conflicts with official mariadb image
+    image: mariadb_42
     # Load variables from .env file
     env_file:
       - .env
@@ -13,26 +14,36 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     restart: always
+    # healthcheck to ensure mariadb is ready before wordpress tries to connect
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   wordpress:
     container_name: wordpress
     build: ./requirements/wordpress
-    image: wordpress
+    # image wordpress_42: the _42 suffix is to avoid name conflicts with official wordpress image
+    image: wordpress_42
+    # Load variables from .env file
     env_file:
       - .env
     networks:
       - inception
     volumes:
       - wordpress_data:/var/www/html
-    # Wait for mariadb to be ready
+    # Wait for mariadb healthcheck to pass
     depends_on:
-      - mariadb
+      mariadb:
+          condition: service_healthy
     restart: always
 
   nginx:
     container_name: nginx
     build: ./requirements/nginx
-    image: nginx
+    # image nginx_42: the _42 suffix is to avoid name conflicts with official nginx image
+    image: nginx_42
     env_file:
       - .env
     ports:

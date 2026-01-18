@@ -88,7 +88,7 @@ collation-server      = utf8mb4_general_ci
 
 This script handles the "Inception" requirement of creating the database and users automatically.
 
-**Note:** We use variables like `${SQL_DATABASE}` here. These variables don't exist yet! We will define them later in the `.env` file and pass them via `docker-compose`.
+**Note:** We use variables like `${SQL_DATABASE}` here. These variables don't exist yet! We will define them later in the `.env` file and pass them via `docker compose`.
 
 ```bash
 #!/bin/bash

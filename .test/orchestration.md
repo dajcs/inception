@@ -160,7 +160,7 @@ Now, you are ready to launch the entire stack.
 2.  Run the compose command:
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 *   `up`: Start the containers.

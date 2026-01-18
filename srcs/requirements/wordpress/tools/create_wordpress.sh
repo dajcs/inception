@@ -20,10 +20,10 @@ else
     # 0. Wait for MariaDB to be ready
     # We try to connect to the DB host. If it fails, we sleep and retry.
     echo "Waiting for MariaDB..."
-    while ! mysqladmin ping -h"mariadb" --silent; do
-        sleep 1
+    while ! mariadb -h mariadb -u$SQL_USER -p$SQL_PASSWORD $SQL_DATABASE &>/dev/null; do
+        sleep 2
     done
-    echo "MariaDB is up!"
+    echo "MariaDB is accessible and user is ready!"
 
     # 1. Download WordPress core files
     wp core download --allow-root

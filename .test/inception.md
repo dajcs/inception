@@ -135,8 +135,8 @@ The Makefile goes at the root.
 
 *   **Variables:** Define paths (e.g., `COMPOSE_FILE=./srcs/docker-compose.yml`).
 *   **Rules:**
-    *   `all`: Create the data directories (`mkdir -p ...`) and run `docker-compose up -d --build`.
-    *   `down`: `docker-compose down`.
+    *   `all`: Create the data directories (`mkdir -p ...`) and run `docker compose up -d --build`.
+    *   `down`: `docker compose down`.
     *   `clean`: Stop containers and remove images.
     *   `fclean`: Deep clean. Remove containers, images, networks, **and** delete the contents of `/home/login/data` (be careful with `sudo rm -rf`).
     *   `re`: `fclean` + `all`.
@@ -172,7 +172,7 @@ You must write three specific files in Markdown.
 
 ### Phase 6: Bonus Part
 
-If you finish the mandatory part, create a specific `docker-compose.override.yml` or add to the main one (depending on your preference, though usually, a single compose file is easier for grading).
+If you finish the mandatory part, create a specific `docker compose.override.yml` or add to the main one (depending on your preference, though usually, a single compose file is easier for grading).
 
 1.  **Redis:**
     *   Container: Redis image (custom Dockerfile).

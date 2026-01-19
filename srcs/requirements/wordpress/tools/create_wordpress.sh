@@ -38,7 +38,7 @@ else
 
     # 3. Install WordPress (This creates the Admin User)
     wp core install \
-    --url=$DOMAIN_NAME \
+    --url="https://$DOMAIN_NAME" \
     --title=$SITE_TITLE \
     --admin_user=$WP_ADMIN_USER \
     --admin_password=$WP_ADMIN_PASSWORD \

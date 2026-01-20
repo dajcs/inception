@@ -70,6 +70,7 @@ fi
 
 #  Ensure www-data owns the files so NGINX and FTP can write to them
 chown -R www-data:www-data /var/www/html
+chmod -R 775 /var/www/html
 
 
 # Start PHP-FPM in the foreground (-F)

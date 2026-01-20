@@ -100,3 +100,54 @@ This proves that the Docker Volumes are working.
     - Main wordpress page (`https://anemet.42.fr:443/`)
     - **Expectation:** The post **shouldn't be there**, because we wiped the named volumes in `/home/anemet/data/mariadb` and `/home/anemet/data/wordpress`.
 
+
+## Bonus FTP test
+
+### 1. Create a dummy file to upload
+Create a small text file on your host machine to test the upload feature:
+
+```bash
+echo "Hello from Inception FTP" > test_ftp.txt
+```
+
+### 2. Connect to the FTP Server
+Run the following command. The `-p` flag forces **Passive Mode**, which is required for the Docker port mapping to work correctly.
+
+```bash
+ftp -p localhost
+```
+
+### 3. Interactive Session
+Once inside the FTP shell, follow these steps:
+
+1.  **Login:**
+    *   **Name**: `ftpuser`
+    *   **Password**: `fpass123`
+
+2.  **List Files (Test Read Access):**
+    You should see the WordPress files (`index.php`, `wp-config.php`, etc.).
+    ```ftp
+    ls
+    ```
+
+3.  **Upload File (Test Write Access):**
+    Upload the file we created in step 2.
+    ```ftp
+    put test_ftp.txt
+    ```
+
+4.  **Verify via Browser (Optional):**
+    Open your browser to `https://anemet.42.fr/test_ftp.txt`. You should see "Hello from Inception FTP".
+
+5.  **Delete File (Test Delete Access):**
+    Clean up the file.
+    ```ftp
+    delete test_ftp.txt
+    ```
+
+6.  **Exit:**
+    ```ftp
+    bye
+    ```
+
+---

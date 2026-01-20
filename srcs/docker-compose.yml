@@ -111,7 +111,8 @@ services:
     build: ./requirements/portainer
     image: portainer_42
     ports:
-      - "9000:9000"
+      - "9000:9000"  # Direct HTTP
+      - "9443:9443"  # Direct HTTPS (Self-signed)
     networks:
       - inception
     volumes:

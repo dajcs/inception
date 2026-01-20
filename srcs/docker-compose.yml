@@ -65,7 +65,24 @@ services:
     networks:
       - inception
     restart: always
-  # ==================================================== #
+
+  # =================    BONUS: ftp    ================= #
+  ftp:
+    container_name: ftp
+    build: ./requirements/ftp
+    image: ftp_42
+    env_file:
+      - .env
+    volumes:
+      # Mount the SAME volume as WordPress
+      - wordpress_data:/var/www/html
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    networks:
+      - inception
+    restart: always
+
 
 
 # Define the network

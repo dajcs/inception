@@ -81,7 +81,7 @@ SHOW TABLES;
 This proves that the Docker Volumes are working.
 
 1.  **In your Browser:**
-    - Log in to WordPress (`https://localhost:8443/wp-admin/`).
+    - Log in to WordPress (`https://localhost:443/wp-admin/`).
     - Create a new Post. Title it: **"Hello 42 Evaluation"**.
     - Publish it.
 

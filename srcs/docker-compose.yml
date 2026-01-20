@@ -83,7 +83,17 @@ services:
       - inception
     restart: always
 
-
+  # =================   BONUS: website  ================= #
+  website:
+    container_name: website
+    build: ./requirements/website
+    image: website_42
+    # ports:
+    #   - "8080:80"  # Map Host 8080 to Container 80
+    networks:
+      - inception
+    restart: always
+  # ==================================================== #
 
 # Define the network
 networks:

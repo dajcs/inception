@@ -60,7 +60,7 @@ services:
   # =================   BONUS: Redis   ================= #
   redis:
     container_name: redis
-    build: ./requirements/bonus/redis
+    build: ./requirements/redis
     image: redis_42
     networks:
       - inception

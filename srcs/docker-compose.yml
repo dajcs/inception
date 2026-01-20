@@ -57,6 +57,17 @@ services:
       - wordpress
     restart: always
 
+  # =================   BONUS: Redis   ================= #
+  redis:
+    container_name: redis
+    build: ./requirements/bonus/redis
+    image: redis_42
+    networks:
+      - inception
+    restart: always
+  # ==================================================== #
+
+
 # Define the network
 networks:
   inception:

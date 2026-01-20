@@ -50,6 +50,22 @@ else
     $WP_EMAIL \
     --role=author \
     --user_pass=$WP_PASSWORD --allow-root
+
+    # ================================================================= #
+    #                  BONUS: REDIS CACHE SETUP
+    # ================================================================= #
+    
+    # 1. Install the Redis Object Cache Plugin
+    wp plugin install redis-cache --activate --allow-root
+
+    # 2. Modify wp-config.php to add Redis host and port details
+    # We use 'redis' because that will be the hostname in docker-compose
+    wp config set WP_REDIS_HOST redis --allow-root
+    wp config set WP_REDIS_PORT 6379 --allow-root
+    
+    # 3. Enable the Redis Object Cache
+    wp redis enable --allow-root
+
 fi
 
 # Start PHP-FPM in the foreground (-F)

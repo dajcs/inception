@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/16 15:47:41 by anemet            #+#    #+#              #
-#    Updated: 2026/01/16 16:03:43 by anemet           ###   ########.fr        #
+#    Updated: 2026/01/20 13:50:23 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y \
     php7.4 \
     php7.4-fpm \
     php7.4-mysql \
-    mariadb-client
+    mariadb-client \
+    php7.4-redis
 
 # 2. Download WP-CLI (Command Line Interface for WordPress)
 # This allows us to install WordPress using commands instead of the browser

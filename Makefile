@@ -6,7 +6,7 @@
 #    By: anemet <anemet@student.42luxembourg.lu>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/16 17:08:25 by anemet            #+#    #+#              #
-#    Updated: 2026/01/18 16:35:54 by anemet           ###   ########.fr        #
+#    Updated: 2026/01/20 18:22:47 by anemet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,8 +34,10 @@ clean: down
 	@printf "Cleaning configuration ${name}...\n"
 	@docker system prune -a
 
-fclean: down
+fclean:
 	@printf "Total clean of all configurations docker\n"
+	# Stop containers AND remove docker-managed volumes (like portainer_data)
+	@docker compose -f ./srcs/docker-compose.yml down --volumes
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force

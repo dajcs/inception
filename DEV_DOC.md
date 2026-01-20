@@ -341,3 +341,35 @@ When filling the login form (Server: `mariadb`, User: `anemet`...) and clicking 
   - Password: apass123 (Your SQL_PASSWORD)
   - Database: inception (Your SQL_DATABASE)
 - Upon successful login, the WordPress database tables should be visible.
+
+
+## Portainer (bonus 5)
+
+Here is the breakdown of the three different ways you can currently access Portainer, followed by the explanation of the persistence issue and the fixed Makefile.
+
+### 1. Understanding the Traffic Flow
+
+You currently have three doors open to your Portainer container.
+
+#### A. The Nginx Proxy (`https://anemet.42.fr/portainer/`)
+This is the "Clean" way, matching the project requirements.
+1.  **Browser** connects to Port **443** (Nginx Container).
+2.  **Nginx** handles the security (SSL Certificate).
+3.  **Nginx** strips the `/portainer` prefix and forwards traffic internally to `portainer:9000`.
+4.  **Portainer** sees an unencrypted HTTP request coming from Nginx.
+5.  *Benefit:* You use the valid SSL certificate generated for the subject.
+
+#### B. Direct HTTP (`http://anemet.42.fr:9000`)
+1.  **Browser** connects directly to Port **9000** on your VM.
+2.  **Docker** maps this directly to Port 9000 inside the Portainer container.
+3.  **Portainer** responds directly.
+4.  *Risk:* Your password travels in plain text. Anyone sniffing the network can steal your credentials.
+
+#### C. Direct HTTPS (`https://anemet.42.fr:9443`)
+1.  **Browser** connects to Port **9443** on your VM.
+2.  **Docker** maps this to Port 9443 inside the container.
+3.  **Portainer** uses its **own** internal SSL certificate (Self-Signed).
+4.  *Result:* The connection is encrypted, but your browser warns you ("Not Secure") because it doesn't trust the certificate Portainer generated for itself.
+
+---
+

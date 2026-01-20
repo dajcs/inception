@@ -38,7 +38,7 @@ else
 
     # 3. Install WordPress (This creates the Admin User)
     wp core install \
-    --url="https://$DOMAIN_NAME" \
+    --url="$DOMAIN_NAME" \
     --title=$SITE_TITLE \
     --admin_user=$WP_ADMIN_USER \
     --admin_password=$WP_ADMIN_PASSWORD \
@@ -67,6 +67,10 @@ else
     wp redis enable --allow-root
 
 fi
+
+#  Ensure www-data owns the files so NGINX and FTP can write to them
+chown -R www-data:www-data /var/www/html
+
 
 # Start PHP-FPM in the foreground (-F)
 exec /usr/sbin/php-fpm7.4 -F

@@ -104,6 +104,23 @@ services:
     depends_on:
       - mariadb
     restart: always
+
+  # ================= BONUS: Portainer ================= #
+  portainer:
+    container_name: portainer
+    build: ./requirements/portainer
+    image: portainer_42
+    ports:
+      - "9000:9000"
+    networks:
+      - inception
+    volumes:
+      # CRITICAL: Allow access to Host Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persist Portainer data (admin password, etc)
+      - portainer_data:/data
+    restart: always
+
   # ==================================================== #
 
 # Define the network
@@ -128,3 +145,7 @@ volumes:
       o: bind
       # ABSOLUTE PATH TO YOUR HOST MACHINE FOLDER
       device: /home/anemet/data/wordpress
+  
+   # Add portainer
+  portainer_data:
+

@@ -236,3 +236,108 @@ If we hadn't moved the files into a `/cv` folder inside the container, Nginx wou
 4.  It sends the response back to your **Browser**.
 
 ---
+
+
+## Adminer (bonus 4)
+
+
+A classic example of **Routing** and **Proxying**. Here is the detailed breakdown of what happens when requesting `https://anemet.42.fr/adminer`.
+
+### 1. The Architecture Visualized
+
+```text
+       USER (Browser)
+          |
+          |  1. HTTPS Request "GET /adminer/"
+          v
+  [ CONTAINER: NGINX ] (Port 443)
+          |
+          |  2. Matches location /adminer/
+          |  3. Proxies to "http://adminer:8080/adminer/"
+          v
+  [ CONTAINER: ADMINER ] (Port 8080)
+          |
+          |  4. PHP Server receives request
+          |  5. Maps URI to File System
+          |  6. Executes /var/www/html/adminer/index.php
+          |
+          v
+     Generates HTML Login Form
+          |
+          ^ (Returns back up the chain)
+```
+
+---
+
+### 2. Step-by-Step Execution
+
+#### Step 1: The Browser Request
+The browser sends an encrypted request to `https://anemet.42.fr/adminer/`.
+*   **Protocol:** HTTPS
+*   **Port:** 443
+
+#### Step 2: Nginx Decryption & Routing
+The **Nginx Container** receives the traffic. It decrypts the SSL using certificates.
+It then looks at its configuration file (`nginx.conf`) to decide what to do with the path `/adminer/`.
+
+It finds this block:
+```nginx
+location ^~ /adminer/ {
+    proxy_pass http://adminer:8080;
+}
+```
+*   **Interpretation:** "Any request starting with `/adminer/` must be forwarded to the host named `adminer` on port `8080`."
+
+#### Step 3: The Internal Proxy
+Nginx acts as a client. It creates a **new** HTTP request inside the Docker network.
+*   **Destination:** `adminer` (Docker resolves this name to the IP address of the adminer container).
+*   **Port:** 8080.
+*   **Path:** It preserves the path `/adminer/`.
+
+#### Step 4: The Adminer Container (PHP Server)
+The **Adminer Container** is running this command:
+```bash
+php -S 0.0.0.0:8080 -t /var/www/html
+```
+*   **`-S 0.0.0.0:8080`**: PHP is listening for web requests on port 8080.
+*   **`-t /var/www/html`**: This is the "Document Root". This is the base folder for looking for files.
+
+When the request for `/adminer/` arrives:
+1.  PHP starts at the root: `/var/www/html`
+2.  It appends the requested path: `/adminer/`
+3.  Full path: `/var/www/html/adminer/`
+4.  Since it is a directory, it looks for an index file (`index.php`), which is downloaded there in the startup script.
+
+#### Step 5: Execution & Response
+PHP executes the `adminer-4.8.1.php` code. This script generates the HTML for the login page.
+This HTML is sent back to Nginx -> Nginx encrypts it -> Nginx sends it to the browser.
+
+---
+
+### 3. What happens when at Login? (The Database Connection)
+
+When filling the login form (Server: `mariadb`, User: `anemet`...) and clicking "Login":
+
+1.  **Browser:** POST request to `/adminer/`.
+2.  **Nginx:** Forwards POST to **Adminer Container**.
+3.  **Adminer Container:** PHP reads the form data. It sees "Server: mariadb".
+4.  **Internal Connection:** The PHP script inside the Adminer container attempts to open a MySQL connection to the host `mariadb`.
+5.  **Docker DNS:** Docker resolves `mariadb` to the IP of your **MariaDB Container**.
+6.  **MariaDB Container:** Authenticates the user.
+7.  **Result:** MariaDB sends table data to Adminer -> Adminer generates HTML -> Nginx -> Browser.
+
+### Why did we set it up this way?
+
+1.  **Zero Configuration Nginx:** By using the PHP built-in server inside the Adminer container, we didn't need to install a second full Nginx server inside the Adminer container. It keeps the container very lightweight.
+2.  **Path Consistency:** We created the folder `/var/www/html/adminer` inside the container specifically so that the URL `/adminer/` maps perfectly to the file system. If we had put the file at the root `/var/www/html/index.php`, we would have needed complex URL rewriting rules in Nginx to strip the `/adminer` prefix.
+
+### 4. Testing Adminer
+
+- Open browser to: `https://anemet.42.fr/adminer/`
+- Login to Adminer:
+  - System: MySQL
+  - Server: mariadb (This is the container name)
+  - Username: anemet (Your SQL_USER)
+  - Password: apass123 (Your SQL_PASSWORD)
+  - Database: inception (Your SQL_DATABASE)
+- Upon successful login, the WordPress database tables should be visible.

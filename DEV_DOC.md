@@ -76,35 +76,27 @@ SHOW TABLES;
 - expect: list of about 12 tables (`wp_users`, `wp_posts`, `wp_options`, etc.)
 ---
 
-#### The "Persistence" Test
+### The "Persistence" Test
 
 This proves that the Docker Volumes are working.
 
-1.  **In your Browser:**
-    - Log in to WordPress (`https://localhost:8443/wp-admin/`).
-    - Create a new Post. Title it: **"Hello 42 Evaluation"**.
+1.  **In Browser:**
+    - Log in to WordPress (`https://localhost:8443/wp-admin/`) as supervisor
+    - Create a new Post. Title it: **"Hello 42 Evaluation"**
     - Publish it.
 
-2.  **In the Terminal (Database):**
-    - Login to SQL.
-    - Run this query to find your post:
-        ```sql
-        USE inception;
-        SELECT post_title, post_content FROM wp_posts WHERE post_title='Hello 42 Evaluation';
-        ```
-    - **Expectation:** You should see the text you just wrote in the browser appearing here in the terminal.
+2.  **Check Browser:**
+    - Main wordpress page (`https://localhost:8443/`)
+    - **Expectation:** The post you created should be visible.
 
 3.  **The Crash Test:**
-    - Exit SQL (`exit`).
-    - Stop the project: `docker-compose -f srcs/docker-compose.yml down`.
-    - Start the project again: `docker-compose -f srcs/docker-compose.yml up -d`.
-    - Login to SQL again and run the `SELECT` query above.
+    - Remove all containers and rebuild configuration (`make re`)
+    - Main wordpress page (`https://localhost:8443/`)
     - **Expectation:** The post **must still be there**. If it disappeared, your volumes are not configured correctly.
 
-#### D. Check the WordPress Users
-The subject requires two WordPress users (one admin, one regular).
-```sql
-USE inception;
-SELECT user_login, user_email FROM wp_users;
-```
-*   **Expectation:** You should see the admin user (e.g., `supervisor`) and the regular user (e.g., `regular`) that you defined in your `.env` file.
+3.  **The Total Wipe Test:**
+    - Total clean of all docker containers **and named volumes** (`make fclean`)
+    - Start the project again: `make`.
+    - Main wordpress page (`https://localhost:8443/`)
+    - **Expectation:** The post **shouldn't be there**, because we wiped the named volumes in `/home/anemet/data/mariadb` and `/home/anemet/data/wordpress`.
+

@@ -81,22 +81,22 @@ SHOW TABLES;
 This proves that the Docker Volumes are working.
 
 1.  **In Browser:**
-    - Log in to WordPress (`https://localhost:8443/wp-admin/`) as supervisor
-    - Create a new Post. Title it: **"Hello 42 Evaluation"**
+    - Log in to WordPress (`https://anemet.42.fr:443/wp-admin/`).
+    - Create a new Post. Title it: **"Hello 42 Evaluation"**.
     - Publish it.
 
 2.  **Check Browser:**
-    - Main wordpress page (`https://localhost:8443/`)
+    - Main wordpress page (`https://anemet.42.fr:443/`)
     - **Expectation:** The post you created should be visible.
 
 3.  **The Crash Test:**
     - Remove all containers and rebuild configuration (`make re`)
-    - Main wordpress page (`https://localhost:8443/`)
+    - Main wordpress page (`https://anemet.42.fr:443/`)
     - **Expectation:** The post **must still be there**. If it disappeared, your volumes are not configured correctly.
 
 3.  **The Total Wipe Test:**
     - Total clean of all docker containers **and named volumes** (`make fclean`)
     - Start the project again: `make`.
-    - Main wordpress page (`https://localhost:8443/`)
+    - Main wordpress page (`https://anemet.42.fr:443/`)
     - **Expectation:** The post **shouldn't be there**, because we wiped the named volumes in `/home/anemet/data/mariadb` and `/home/anemet/data/wordpress`.
 

@@ -93,6 +93,17 @@ services:
     networks:
       - inception
     restart: always
+
+  # =================  BONUS: Adminer  ================= #
+  adminer:
+    container_name: adminer
+    build: ./requirements/adminer
+    image: adminer_42
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+    restart: always
   # ==================================================== #
 
 # Define the network

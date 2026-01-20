@@ -101,7 +101,7 @@ This proves that the Docker Volumes are working.
     - **Expectation:** The post **shouldn't be there**, because we wiped the named volumes in `/home/anemet/data/mariadb` and `/home/anemet/data/wordpress`.
 
 
-## Bonus FTP test
+## FTP test (bonus 2)
 
 ### 1. Create a dummy file to upload
 Create a small text file on your host machine to test the upload feature:
@@ -149,5 +149,90 @@ Once inside the FTP shell, follow these steps:
     ```ftp
     bye
     ```
+
+---
+
+## Static Website serving using Reverse Proxy (bonus 3)
+
+This setup effectively implements a **Microservices Architecture** pattern using a **Reverse Proxy**.
+
+This is happening when requesting `https://anemet.42.fr/cv/` into the browser.
+
+### 1. The Architecture Visualized
+
+```text
+       USER (Browser)
+          |
+          |  1. HTTPS Request (Port 443)
+          v
+  [ CONTAINER: NGINX (Main) ]  <-- The "Front Door" / Reverse Proxy
+          |
+          |  2. Decrypts SSL
+          |  3. Sees "/cv/" path
+          |  4. Proxies request (HTTP Port 80)
+          v
+  [ CONTAINER: WEBSITE ]       <-- The "Static File Server"
+          |
+          |  5. Fetches /var/www/html/cv/index.html
+          |
+          ^ Returns Content
+```
+
+---
+
+### 2. The Step-by-Step Flow
+
+#### Step 1: The Browser Connection
+The browser connects to `anemet.42.fr` on port **443**.
+*   The **Main Nginx container** accepts this connection.
+*   It performs the SSL Handshake (using certificates) to decrypt the data.
+*   It looks at the requested URL: `/cv/`.
+
+#### Step 2: The Main Nginx "Routing"
+Inside `srcs/requirements/nginx/conf/nginx.conf`, the server reads this block:
+
+```nginx
+location ^~ /cv/ {
+    include /etc/nginx/proxy_params;
+    proxy_pass http://website:80;
+}
+```
+
+*   **`location ^~ /cv/`**: This tells Nginx, "If the URL starts with `/cv/`, stop looking for other rules (like PHP) and execute this block immediately."
+*   **`proxy_pass http://website:80`**: Here is the magic.
+    *   **`http`**: Switch protocol to standard HTTP (internal network is safe).
+    *   **`website`**: This is the **Host**. Docker's internal DNS resolver looks at your `docker-compose.yml`, sees the service named `website`, and resolves it to that container's internal IP address (e.g., `172.18.0.4`).
+    *   **`:80`**: The port the Website container is listening on.
+
+The Main Nginx acts as a client here. It forwards the request to the Website container.
+
+#### Step 3: The Website Container
+The **Website container** (running its own lightweight Nginx) receives a request for:
+`GET /cv/`
+
+Inside `srcs/requirements/bonus/website/Dockerfile`, we did this:
+```dockerfile
+# We created a subdirectory matching the URL path
+COPY tools/ /var/www/html/cv/
+```
+
+And its internal Nginx config (`conf/nginx.conf`) says:
+```nginx
+root /var/www/html;
+```
+
+So, when the request for `/cv/` comes in:
+1.  Nginx takes the `root` (`/var/www/html`).
+2.  Appends the request path (`/cv/`).
+3.  Looks for the index file.
+4.  Result: It serves `/var/www/html/cv/index.html`.
+
+If we hadn't moved the files into a `/cv` folder inside the container, Nginx would have looked for `/var/www/html/cv/` and found nothing (404 Not Found), because the files would have been sitting at the root.
+
+#### Step 4: The Return Trip
+1.  The **Website container** sends the HTML content back to the **Main Nginx**.
+2.  The **Main Nginx** receives the HTML.
+3.  It re-encrypts the data (SSL).
+4.  It sends the response back to your **Browser**.
 
 ---

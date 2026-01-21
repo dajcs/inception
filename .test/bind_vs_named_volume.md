@@ -1,6 +1,6 @@
 # Bind Mounts vs Named Volumes in Docker Compose
 
-Here is the detailed explanation of why this our config works.
+Explaining the difference between Bind Mounts and Named Volumes in Docker Compose, and how to configure a Named Volume to point to a specific host path.
 
 ### 1. The Distinction
 

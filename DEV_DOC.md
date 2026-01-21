@@ -7,18 +7,46 @@
 
 ```bash
 curl -v http://anemet.42.fr 
+
+# * connect to 127.0.0.1 port 80 failed: Connection refused
 ```
 - secure access test (access works, but complains about self-signed certificate):
 
 ```bash 
-curl -v https://anemet.42.fr # expect: self-signed certificate complaint
+curl -v https://anemet.42.fr 
+
+# *   Trying 127.0.0.1:443...
+# * Connected to anemet.42.fr (127.0.0.1) port 443 (#0)
+# ...
+# * SSL certificate problem: self-signed certificate
+# * Closing connection 0
+# curl: (60) SSL certificate problem: self-signed certificate
 ```
 
-- To ignore the self-signed certificate warning, use:
+- To ignore the self-signed certificate problem, use:
 
 ```bash
-# -k: Ignore self-signed certificate security warning.
+
+# -k: Ignore self-signed certificate security problem.
 curl -v -k https://anemet.42.fr:443
+
+# *   Trying 127.0.0.1:443...
+# * Connected to anemet.42.fr (127.0.0.1) port 443 (#0)
+# ...
+# * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+# * ALPN, server accepted to use http/1.1
+# * Server certificate:
+# *  subject: C=FR; ST=IDF; L=Paris; O=42; OU=42; CN=anemet.42.fr; UID=anemet
+# *  start date: Jan 21 12:27:35 2026 GMT
+# *  expire date: Jan 21 12:27:35 2027 GMT
+# *  issuer: C=FR; ST=IDF; L=Paris; O=42; OU=42; CN=anemet.42.fr; UID=anemet
+# *  SSL certificate verify result: self-signed certificate (18), continuing anyway.
+# * TLSv1.2 (OUT), TLS header, Supplemental data (23):
+# > GET / HTTP/1.1
+# > Host: anemet.42.fr
+# > User-Agent: curl/7.81.0
+# > Accept: */*
+# 
 ```
 
 ### Checking the logs:
@@ -59,34 +87,41 @@ docker exec -it nginx bash
 
 
 
-### 1. Login to the Database
+### The mariadb Database
 
 There are two users:
 
 - **`root`**: This is the "Super Admin". Used to **administer the server**, check if other users exist, or fix broken permissions. It has access to *everything*.
 - **`anemet` (my Custom User)**: This is the user **WordPress uses**. This user has access to the specific database (`inception`).
 
----
 
-### 2. How to Login
+- **To login as root:**
 
-**To login as root:**
 ```bash
-docker exec -it mariadb mysql -u root -p
+# join mariadb container
+docker exec -it mariadb bash
+
+# then inside the container shell, run:
+ mysql -u root -p
 # Password: SQL_ROOT_PASSWORD from your .env
 ```
- and run:
+
+ - check users with:
+
 ```sql
 SELECT User, Host FROM mysql.user;
 ```
 - check existence of: `root`@`localhost` and `anemet`@`%`.
 
-**To login as anemet:**
+- **To login as anemet:**
+
 ```bash
-docker exec -it mariadb mysql -u anemet -p
+docker exec -it mariadb bash
+# then inside the container shell, run:
+ mysql -u anemet -p
 # Password: SQL_PASSWORD from your .env
 ```
-and run:
+- check wordpress database tables with:
 ```sql
 USE inception;
 SHOW TABLES;
@@ -99,24 +134,35 @@ SHOW TABLES;
 This proves that the Docker Volumes are working.
 
 1.  **In Browser:**
-    - Log in to WordPress (`https://anemet.42.fr:443/wp-admin/`).
+    - Log in to WordPress (`https://anemet.42.fr/wp-admin/`).
     - Create a new Post. Title it: **"Hello 42 Evaluation"**.
     - Publish it.
 
 2.  **Check Browser:**
-    - Main wordpress page (`https://anemet.42.fr:443/`)
+    - Main wordpress page (`https://anemet.42.fr/`)
     - **Expectation:** The post you created should be visible.
 
 3.  **The Crash Test:**
-    - Remove all containers and rebuild configuration (`make re`)
-    - Main wordpress page (`https://anemet.42.fr:443/`)
-    - **Expectation:** The post **must still be there**. If it disappeared, your volumes are not configured correctly.
+    - reboot the VM (`sudo reboot`)
+    - Main wordpress page (`https://anemet.42.fr/`)
+    - **Expectation:** The post **must still be there**. 
 
 3.  **The Total Wipe Test:**
     - Total clean of all docker containers **and named volumes** (`make fclean`)
     - Start the project again: `make`.
-    - Main wordpress page (`https://anemet.42.fr:443/`)
+    - Main wordpress page (`https://anemet.42.fr/`)
     - **Expectation:** The post **shouldn't be there**, because we wiped the named volumes in `/home/anemet/data/mariadb` and `/home/anemet/data/wordpress`.
+
+
+## Redis (bonus 1)
+
+- Go to the website `https://anemet.42.fr/wp-admin` and login as supervisor.
+- In the left sidebar, navigate to "Plugins" `https://anemet.42.fr/wp-admin/plugins.php`
+- Click on "Redis Object Cache" settings link or go to `https://anemet.42.fr/wp-admin/options-general.php?page=redis-cache`
+- Check for:
+  - Status: 	Connected
+  - Filesystem: 	Writeable
+  - Redis: 	Reachable 
 
 
 ## FTP test (bonus 2)
@@ -129,6 +175,7 @@ echo "Hello from Inception FTP" > test_ftp.txt
 ```
 
 ### 2. Connect to the FTP Server
+
 Run the following command. The `-p` flag forces **Passive Mode**, which is required for the Docker port mapping to work correctly.
 
 ```bash
@@ -136,11 +183,12 @@ ftp -p localhost
 ```
 
 ### 3. Interactive Session
+
 Once inside the FTP shell, follow these steps:
 
 1.  **Login:**
     *   **Name**: `ftpuser`
-    *   **Password**: `fpass123`
+    *   **Password**: `<...>` (the FTP_PASSWORD you set in the .env file)
 
 2.  **List Files (Test Read Access):**
     You should see the WordPress files (`index.php`, `wp-config.php`, etc.).
@@ -170,7 +218,7 @@ Once inside the FTP shell, follow these steps:
 
 ---
 
-## Static Website serving using Reverse Proxy (bonus 3)
+## Static Website serving (bonus 3)
 
 This setup effectively implements a **Microservices Architecture** pattern using a **Reverse Proxy**.
 
@@ -225,6 +273,7 @@ location ^~ /cv/ {
 The Main Nginx acts as a client here. It forwards the request to the Website container.
 
 #### Step 3: The Website Container
+
 The **Website container** (running its own lightweight Nginx) receives a request for:
 `GET /cv/`
 
@@ -355,39 +404,49 @@ When filling the login form (Server: `mariadb`, User: `anemet`...) and clicking 
 - Login to Adminer:
   - System: MySQL
   - Server: mariadb (This is the container name)
-  - Username: anemet (Your SQL_USER)
-  - Password: apass123 (Your SQL_PASSWORD)
-  - Database: inception (Your SQL_DATABASE)
+  - Username: anemet (the SQL_USER)
+  - Password: <...> (the SQL_PASSWORD)
+  - Database: inception (the SQL_DATABASE)
 - Upon successful login, the WordPress database tables should be visible.
 
 
 ## Portainer (bonus 5)
 
-Here is the breakdown of the three different ways you can currently access Portainer, followed by the explanation of the persistence issue and the fixed Makefile.
+### 0. Make sure the Portainer is accessible
+
+The Portainer service should be accessed and and admin user needs to be created in the first 5 minutes after starting the containers. 
+
+When accessing `https://anemet.42.fr/portainer/`, if there is a timeout, we need to restart.
+
+```bash
+docker restart portainer
+```
+Now try to access again within 5 minutes and create the admin user.
+
 
 ### 1. Understanding the Traffic Flow
 
-You currently have three doors open to your Portainer container.
+We have three "doors" open to the Portainer container.
 
 #### A. The Nginx Proxy (`https://anemet.42.fr/portainer/`)
-This is the "Clean" way, matching the project requirements.
+This is the "Nice" way to access Portainer.
 1.  **Browser** connects to Port **443** (Nginx Container).
 2.  **Nginx** handles the security (SSL Certificate).
 3.  **Nginx** strips the `/portainer` prefix and forwards traffic internally to `portainer:9000`.
 4.  **Portainer** sees an unencrypted HTTP request coming from Nginx.
-5.  *Benefit:* You use the valid SSL certificate generated for the subject.
+5.  *Benefit:* We use the "valid" SSL certificate generated for the subject.
 
 #### B. Direct HTTP (`http://anemet.42.fr:9000`)
-1.  **Browser** connects directly to Port **9000** on your VM.
+1.  **Browser** connects directly to Port **9000** on the VM.
 2.  **Docker** maps this directly to Port 9000 inside the Portainer container.
 3.  **Portainer** responds directly.
-4.  *Risk:* Your password travels in plain text. Anyone sniffing the network can steal your credentials.
+4.  *Risk:* If there are password in the request, these can be sniffed on the network because there is no encryption.
 
 #### C. Direct HTTPS (`https://anemet.42.fr:9443`)
-1.  **Browser** connects to Port **9443** on your VM.
+1.  **Browser** connects to Port **9443** on the VM.
 2.  **Docker** maps this to Port 9443 inside the container.
 3.  **Portainer** uses its **own** internal SSL certificate (Self-Signed).
-4.  *Result:* The connection is encrypted, but your browser warns you ("Not Secure") because it doesn't trust the certificate Portainer generated for itself.
+4.  *Result:* The connection is encrypted, but the browser warns you ("Not Secure") because it doesn't trust the certificate Portainer generated for itself.
 
 ---
 

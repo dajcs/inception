@@ -1,12 +1,28 @@
 # Development Documentation
 
-Technical details about the Docker setup and support, e.g.:
-   - Customizing config files
-   - To debug DB, enter container: `docker exec -it mariadb bash`
-   - Data persistence works via the volume driver options
 
+### Check Wordpress access at anemet.42.fr
 
-- check the logs:
+- unsecure access test (should not work, port 80 closed):
+
+```bash
+curl -v http://anemet.42.fr 
+```
+- secure access test (access works, but complains about self-signed certificate):
+
+```bash 
+curl -v https://anemet.42.fr # expect: self-signed certificate complaint
+```
+
+- To ignore the self-signed certificate warning, use:
+
+```bash
+# -k: Ignore self-signed certificate security warning.
+curl -v -k https://anemet.42.fr:443
+```
+
+### Checking the logs:
+
 ```bash
 # check logs for a service:
 # docker compose logs -f <service_name>
@@ -16,7 +32,9 @@ docker logs wordpress
 docker logs nginx
 
 ```
-- access the running container:
+
+### Access the running container:
+
 ```bash
 # access a running container:
 # docker exec -it <container_name> bash
@@ -33,10 +51,10 @@ docker exec -it nginx bash
 
   - Nginx configuration: edit the file located at `srcs/requirements/nginx/nginx.conf` before building the containers.
   - MariaDB configuration: modify the `my.cnf` file found in `srcs/requirements/mariadb/my.cnf` to adjust database settings.
-	*   WordPress configuration: `srcs/requirements/wordpress/wp-config.php`.
+  - WordPress configuration: `srcs/requirements/wordpress/wp-config.php`.
   - Each service has its own configuration file located in the `srcs/requirements/` directory.
   - After making changes to configuration files, rebuild the Docker images using `docker compose build` and then restart the services with `docker compose up -d`.
-      - Alternatively it can be done with `make re` command from the repository root directory.
+  - Alternatively it can be done with `make re` command from the repository root directory.
 
 
 
